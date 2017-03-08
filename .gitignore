@@ -38,6 +38,7 @@
 /System.map
 /u-boot*
 /boards.cfg
+/tools/*
 
 #
 # git files that we don't want to ignore even it they are dot-files
@@ -51,7 +52,6 @@
 /LOG
 /spl/
 /tpl/
-/tool/*
 #
 # Generated include files
 #
