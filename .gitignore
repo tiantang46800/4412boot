@@ -51,7 +51,7 @@
 /LOG
 /spl/
 /tpl/
-/tool/
+/tool/*
 #
 # Generated include files
 #
