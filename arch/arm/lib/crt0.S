@@ -91,8 +91,9 @@
  * entry point of crt0 sequence
  */
 
+.global here
 .global _main
-
+.global print_something
 _main:
 
 /*
@@ -100,13 +101,20 @@ _main:
  */
 
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
-	
+
+	adr r5,_main
+	adr r6,_main
+	adr r7,_main
+
+
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	sub	sp, #GD_SIZE	/* allocate one GD above SP */
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
-	mov	r8, sp		/* GD is above SP */
+	mov	r8, sp		/* GD is above SP ,gd 的地址*/
 	mov	r0, #0
 	bl	board_init_f
+
+
 
 #if ! defined(CONFIG_SPL_BUILD)
 /*
@@ -119,14 +127,39 @@ _main:
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	ldr	r8, [r8, #GD_BD]		/* r8 = gd->bd */
 	sub	r8, r8, #GD_SIZE		/* new GD is below bd */
+	/*上述代码同步了前面C使用的数据*/
 
-	adr	lr, here
-	ldr	r0, [r8, #GD_RELOC_OFF]		/* lr = gd->start_addr_sp */
-	add	lr, lr, r0
-	ldr	r0, [r8, #GD_START_ADDR_SP]	/* r0 = gd->start_addr_sp */
-	mov	r1, r8				/* r1 = gd */
-	ldr	r2, [r8, #GD_RELOCADDR]		/* r2 = gd->relocaddr */
-	b	relocate_code
+	mov r9,r0
+	mov r0,r5
+	bl  print_something 
+	mov r0,r9 
+	
+	mov r9,r0
+	mov r0,r5
+	bl  print_something 
+	mov r0,r9 
+
+	mov r9,r0
+	mov r0,r7
+	bl  print_something 
+	mov r0,r9 
+
+//	ldr r1,=here 
+	mov r7,r0
+	adr r0,here
+	bl  print_something
+	mov r0,r7
+	adr	lr, here                     /*lr 里面存放了 here的运行地址,here*/
+							 /*目前一定在链接地址运行*/
+loop:
+	cmp r1,lr 
+	beq loop
+	ldr	r0, [r8, #GD_RELOC_OFF]		 /*r0存放，实际地址和lds地址的偏移量 lr = gd->start_addr_sp */
+	add	lr, lr, r0                   /*lr 是here实际地址的返回值*/
+	ldr	r0, [r8, #GD_START_ADDR_SP]	 /* r0 = gd->start_addr_sp */
+	mov	r1, r8				         /* r1 = gd */
+	ldr	r2, [r8, #GD_RELOCADDR]		 /* 代码搬移的目的地址r2 = gd->relocaddr */
+	b	relocate_code 
 here:
 
 /* Set up final (full) environment */

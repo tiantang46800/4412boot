@@ -46,7 +46,11 @@ void do_ledon(cmd_tbl_t* cmdtp,int flag,int argc,char *argv[])
 U_BOOT_CMD(
 	ledon, 3, 1, do_ledon,"led_on onon ","on on on"
 );
-
+void test_biao_hao(int arg)
+{
+	int * b;
+	b = _TEXT_BASE; 
+}
 void do_ledoff(cmd_tbl_t* cmdtp,int flag,int argc,char *argv[])
 {
 //	gpio_get_value();
@@ -54,7 +58,7 @@ void do_ledoff(cmd_tbl_t* cmdtp,int flag,int argc,char *argv[])
 
 	struct exynos4_gpio_part2 *gpio = (struct exynos4_gpio_part2*)EXYNOS4_GPIO_PART2_BASE;
 	s5p_gpio_direction_output(&gpio->x1, 0, 0);
-	printf("do_ledon\n");
+	printf("do_ledon , %x\n",_TEXT_BASE);
 	return;
 }
 U_BOOT_CMD(

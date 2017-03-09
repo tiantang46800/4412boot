@@ -38,10 +38,11 @@ case "$1" in
 		
 		cd $sec_path
 		cat E4412_N.bl1.SCP2G.bin bl2.bin all00_padding.bin u-boot.bin tzsw_SMDK4412_SCP_2GB.bin > u-boot-fs4412.bin
+		cp u-boot-fs4412.bin /tftpboot/u.b
 		mv u-boot-fs4412.bin $ROOT_DIR
 		
 		rm checksum_bl2_14k.bin
-		rm u-boot.bin
+		rm u-boot.bin 
 
 		echo 
 		echo 

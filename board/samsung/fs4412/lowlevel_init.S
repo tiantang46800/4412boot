@@ -41,7 +41,7 @@ _TEXT_BASE:
 lowlevel_init:
 	ldr sp,=0x02060000
 	push	{lr}
-
+#if 1
 	/* r5 has always zero */
 	mov	r5, #0
 	ldr	r7, =EXYNOS4_GPIO_PART1_BASE
@@ -64,9 +64,9 @@ lowlevel_init:
 	/* Sleep wakeup reset */
 	ldr	r2, =S5P_CHECK_SLEEP
 	cmp	r1, r2
-	beq	wakeup_reset
-
-
+	beq	wakeup_reset 
+	
+#endif
 	/*
 	 * for close watchdog
 	 * PS-Hold high
@@ -95,16 +95,18 @@ lowlevel_init:
 	ldr	r0, =0x0ffffff		/* r0 <- Mask Bits*/
 	bic	r1, pc, r0		/* pc <- current addr of code */
 					/* r1 <- unmasked bits of pc */
+
 	ldr	r2, _TEXT_BASE		/* r2 <- original base addr in ram */
 	bic	r2, r2, r0		/* r2 <- unmasked bits of r2*/
 	cmp	r1, r2			/* compare r1, r2 */
 	beq	1f			/* r0 == r1 then skip sdram init */
-
+loop:
+	b loop
 	/* init system clock */
-	bl system_clock_init
+//x	bl system_clock_init
 
 	/* Memory initialize */
-	bl mem_ctrl_asm_init
+//	bl mem_ctrl_asm_init
 
 1:
 	/* for UART */
@@ -115,8 +117,8 @@ lowlevel_init:
 	pop	{pc}
 
 wakeup_reset:
-	bl system_clock_init
-	bl mem_ctrl_asm_init
+//	bl system_clock_init
+//	bl mem_ctrl_asm_init
 	bl tzpc_init
 
 exit_wakeup:
@@ -135,7 +137,7 @@ exit_wakeup:
  * system_clock_init: Initialize core clock and bus clock.
  * void system_clock_init(void)
  */
-system_clock_init:
+system_clock_init_xxxxx:
 	push	{lr}
 	ldr	r0, =EXYNOS4_CLOCK_BASE
 

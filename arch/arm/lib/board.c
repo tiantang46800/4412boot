@@ -246,27 +246,14 @@ init_fnc_t *init_sequence[] = {
 #ifdef CONFIG_OF_CONTROL
 	fdtdec_check_fdt,
 #endif
-#if defined(CONFIG_BOARD_EARLY_INIT_F)
-	board_early_init_f,
-#endif
 	timer_init,		/* initialize timer */
-#ifdef CONFIG_BOARD_POSTCLK_INIT
-	board_postclk_init,
-#endif
-#ifdef CONFIG_FSL_ESDHC
-	get_clocks,
-#endif
 	env_init,		/* initialize environment */
 	init_baudrate,		/* initialze baudrate settings */
 	serial_init,		/* serial communications setup */
 	console_init_f,		/* stage 1 init of console */
 	display_banner,		/* say that we are here */
-#if defined(CONFIG_DISPLAY_CPUINFO)
 	print_cpuinfo,		/* display cpu info (and speed) */
-#endif
-#if defined(CONFIG_DISPLAY_BOARDINFO)
 	checkboard,		/* display board info */
-#endif
 #if defined(CONFIG_HARD_I2C) || defined(CONFIG_SOFT_I2C)
 	init_func_i2c,
 #endif
@@ -286,10 +273,10 @@ void board_init_f(ulong bootflag)
 #endif
 	void *new_fdt = NULL;
 	size_t fdt_size = 0;
-
+//gd 赋值地址的地方
 	memset((void *)gd, 0, sizeof(gd_t));
 
-	gd->mon_len = _bss_end_ofs;
+	gd->mon_len = _bss_end_ofs;//完整的boot大小
 #ifdef CONFIG_OF_EMBED
 	/* Get a pointer to the FDT */
 	gd->fdt_blob = _binary_dt_dtb_start;
@@ -334,6 +321,7 @@ void board_init_f(ulong bootflag)
 	gd->ram_size -= CONFIG_SYS_MEM_TOP_HIDE;
 #endif
 
+	//SDRAM的最高地址
 	addr = CONFIG_SYS_SDRAM_BASE + gd->ram_size;
 
 #ifdef CONFIG_LOGBUFFER
@@ -460,8 +448,11 @@ void board_init_f(ulong bootflag)
 	dram_init_banksize();
 	display_dram_config();	/* and display it */
 
+	//上面减去一大堆需要预留空间的,得到最终代码存放位置
+	//实际代码存放位置
 	gd->relocaddr = addr;
 	gd->start_addr_sp = addr_sp;
+	//实际代码存放位置 - 标号的内容(0x43e00000=lds文件制定位置)
 	gd->reloc_off = addr - _TEXT_BASE;
 	debug("relocaddr is: %08lx\n", gd->relocaddr);
 	debug("relocation Offset is: %08lx\n", gd->reloc_off);
@@ -471,7 +462,12 @@ void board_init_f(ulong bootflag)
 	}
 	memcpy(id, (void *)gd, sizeof(gd_t));
 }
-
+extern int print_something(int arg);
+int print_something(int arg)
+{
+	printf("*********is %x\n",arg);
+	return arg;
+}
 #if !defined(CONFIG_SYS_NO_FLASH)
 static char *failed = "*** failed ***\n";
 #endif

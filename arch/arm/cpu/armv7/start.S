@@ -134,6 +134,7 @@ reset:
 	orr	r0, r0, #0xd3
 	msr	cpsr,r0
 
+
 #if 1
 	ldr r0, =0x11000c40 @GPK2_7 led2
 	ldr r1, [r0]
@@ -163,7 +164,7 @@ reset:
 
 	/* the mask ROM code should have PLL and others stable */
 	bl	cpu_init_cp15 
-	bl	cpu_init_crit
+	bl	cpu_init_crit 
 
 	 
 	bl	_main
@@ -178,20 +179,23 @@ reset:
  * after relocating the monitor code.
  *
  */
+	
 ENTRY(relocate_code)
 	mov	r4, r0	/* save addr_sp */
 	mov	r5, r1	/* save addr of gd */
 	mov	r6, r2	/* save addr of destination */
 
-	adr	r0, _start
-	cmp	r0, r6
+
+	/* 大前提：运行地址，已经和连接地址一个样子的*/
+	adr	r0, _start      /*r0 现在的运行地址,lds 连接地址*/
+	cmp	r0, r6          /*现在运行地址和拷贝的目的地址是否一样*/
 	moveq	r9, #0		/* no relocation. relocation offset(r9) = 0 */
 	beq	relocate_done		/* skip relocation */
 	mov	r1, r6			/* r1 <- scratch for copy_loop */
-	ldr	r3, _image_copy_end_ofs
-	add	r2, r0, r3		/* r2 <- source end address	    */
+	ldr	r3, _image_copy_end_ofs /*拷贝代码的长度从start一直到rel.dyn的头*/
+	add	r2, r0, r3		/* r2 连接地址kao贝代码的终点<- source end address	    */
 
-copy_loop:
+copy_loop:/*完成代码部分的拷贝*/
 	ldmia	r0!, {r9-r10}		/* copy from source address [r0]    */
 	stmia	r1!, {r9-r10}		/* copy to   target address [r1]    */
 	cmp	r0, r2			/* until source end address [r2]    */
@@ -201,15 +205,18 @@ copy_loop:
 	 * fix .rel.dyn relocations
 	 */
 	ldr	r0, _TEXT_BASE		/* r0 <- Text base */
-	sub	r9, r6, r0		/* r9 <- relocation offset */
+	sub	r9, r6, r0		/* r9 链接地址和未来的拷贝地址差距 <- relocation offset */
 	ldr	r10, _dynsym_start_ofs	/* r10 <- sym table ofs */
 	add	r10, r10, r0		/* r10 <- sym table in FLASH */
 	ldr	r2, _rel_dyn_start_ofs	/* r2 <- rel dyn start ofs */
-	add	r2, r2, r0		/* r2 <- rel dyn start in FLASH */
+	add	r2, r2, r0		/* r2 <- 现在运行地址 拷贝rel的开头位置rel dyn start in FLASH */
 	ldr	r3, _rel_dyn_end_ofs	/* r3 <- rel dyn end ofs */
-	add	r3, r3, r0		/* r3 <- rel dyn end in FLASH */
+	add	r3, r3, r0		/* r3 <-  现在运行地址 拷贝rel的结束位置rel dyn end in FLASH */
+	/*数据如何进入到rel段，这个要看编译器的知识*/
+	/* 用162行的ldr	r0, =_start 来讲解*/
 fixloop:
-	ldr	r0, [r2]		/* r0 <- location to fix up, IN FLASH! */
+	ldr	r0, [r2]		/* r0 从rel里面取出来的A连接地址 <- location to fix up, IN FLASH! */
+						/*rel r2里面放置就是A地址,A地址下面放的又是一个链接地址*/
 	add	r0, r0, r9		/* r0 <- location to fix up in RAM */
 	ldr	r1, [r2, #4]
 	and	r7, r1, #0xff
@@ -246,6 +253,8 @@ _rel_dyn_end_ofs:
 	.word __rel_dyn_end - _start
 _dynsym_start_ofs:
 	.word __dynsym_start - _start
+_test_byte:
+	.byte 1
 ENDPROC(relocate_code)
 
 #endif
@@ -293,7 +302,7 @@ ENDPROC(save_boot_params)
  *
  * Setup CP15 registers (cache, MMU, TLBs). The I-cache is turned on unless
  * CONFIG_SYS_ICACHE_OFF is defined.
- *
+ * TLB MMU 实验
  *************************************************************************/
 ENTRY(cpu_init_cp15)
 	/*

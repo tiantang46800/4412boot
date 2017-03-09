@@ -74,7 +74,7 @@ _main:
 			NULL,
 		};
 	}
-	    //代码重定位
+	    //代码重定位  遇到如下的代码ldr	r0, =_start
 	b  relocate_code
 here://进入主代码
 	//初始化bss
