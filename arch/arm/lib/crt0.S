@@ -106,6 +106,7 @@ _main:
 	adr r6,_main
 	adr r7,_main
 
+//	bl  print_something 
 
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	sub	sp, #GD_SIZE	/* allocate one GD above SP */

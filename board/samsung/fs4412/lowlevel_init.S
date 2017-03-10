@@ -100,13 +100,11 @@ lowlevel_init:
 	bic	r2, r2, r0		/* r2 <- unmasked bits of r2*/
 	cmp	r1, r2			/* compare r1, r2 */
 	beq	1f			/* r0 == r1 then skip sdram init */
-loop:
-	b loop
 	/* init system clock */
-//x	bl system_clock_init
+	bl system_clock_init
 
 	/* Memory initialize */
-//	bl mem_ctrl_asm_init
+	bl mem_ctrl_asm_init
 
 1:
 	/* for UART */
@@ -117,8 +115,8 @@ loop:
 	pop	{pc}
 
 wakeup_reset:
-//	bl system_clock_init
-//	bl mem_ctrl_asm_init
+	bl system_clock_init
+	bl mem_ctrl_asm_init
 	bl tzpc_init
 
 exit_wakeup:
@@ -137,7 +135,7 @@ exit_wakeup:
  * system_clock_init: Initialize core clock and bus clock.
  * void system_clock_init(void)
  */
-system_clock_init_xxxxx:
+system_clock_init:
 	push	{lr}
 	ldr	r0, =EXYNOS4_CLOCK_BASE
 
@@ -354,8 +352,8 @@ system_clock_init_xxxxx:
 	.globl uart_asm_init
 uart_asm_init:
 
-	/* setup UART0-UART3 GPIOs (part1) */
-	mov	r0, r7
+	/* setup UART0-UART3 GPIOs (part1)把串口123全部引脚配置为串口功能呢个 */
+	mov	r0, r7 //0x11400000 
 	ldr	r1, =EXYNOS4_GPIO_A0_CON_VAL
 	str	r1, [r0, #EXYNOS4_GPIO_A0_CON_OFFSET]
 	ldr	r1, =EXYNOS4_GPIO_A1_CON_VAL
@@ -373,15 +371,15 @@ uart_asm_init:
 	ldr r0, =EXYNOS4_UART_BASE
 	add r0, r0, #EXYNOS4_DEFAULT_UART_OFFSET
 
-	ldr	r1, =ULCON_VAL
+	ldr	r1, =ULCON_VAL            //0x3
 	str	r1, [r0, #ULCON_OFFSET]
-	ldr	r1, =UCON_VAL
+	ldr	r1, =UCON_VAL             //0x3c5
 	str	r1, [r0, #UCON_OFFSET]
-	ldr	r1, =UFCON_VAL
+	ldr	r1, =UFCON_VAL            //0x111
 	str	r1, [r0, #UFCON_OFFSET]
-	ldr	r1, =UBRDIV_VAL
+	ldr	r1, =UBRDIV_VAL           //0x35
 	str	r1, [r0, #UBRDIV_OFFSET]
-	ldr	r1, =UFRACVAL_VAL
+	ldr	r1, =UFRACVAL_VAL         //0x4
 	str	r1, [r0, #UFRACVAL_OFFSET]
 	mov	pc, lr
 	nop

@@ -24,7 +24,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).o
 
-#SOBJS	:= mem_setup.o
+SOBJS	:= mem_setup.o
 SOBJS	+= lowlevel_init.o
 
 ifndef CONFIG_SPL_BUILD
